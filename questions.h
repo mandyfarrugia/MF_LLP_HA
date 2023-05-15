@@ -1,0 +1,2 @@
+void viewAllQuestions();
+void shuffleQuestions();
