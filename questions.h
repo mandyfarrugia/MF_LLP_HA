@@ -95,7 +95,6 @@ void deleteQuestions(questionsCollection* questions, unsigned int questionNumber
             questionSet* questionByQuestionNumber = (*questions).list[index]; 
 
             if((*questionByQuestionNumber).questionNumber == questionNumber) {
-                printf("You removed %d at position %d.\n", (*questionByQuestionNumber).questionNumber, index);
                 free((*questions).list[index]);
                 (*questions).list[index] = NULL;
                 (*questions).size--;
