@@ -51,7 +51,7 @@ void askQuestion(questionsCollection questions) {
 
     if(questions.list[randomIndex] != NULL) {
         questionSet questionAtRandomPosition = *(questions.list[randomIndex]);
-        printf("Index: %d\nQuestion: %s\nAnswer: %s\n", randomIndex, questionAtRandomPosition.question, questionAtRandomPosition.answer);
+        viewQuestion(questionAtRandomPosition);
     } else {
         printf("No question at index %d.\n", randomIndex);
     }
@@ -67,6 +67,7 @@ void deleteQuestions(questionsCollection* questions, unsigned int questionNumber
             questionSet* questionByQuestionNumber = (*questions).list[index]; 
 
             if((*questionByQuestionNumber).questionNumber == questionNumber) {
+                printf("You removed %d at position %d.\n", (*questionByQuestionNumber).questionNumber, index);
                 free((*questions).list[index]);
                 (*questions).list[index] = NULL;
                 (*questions).size--;

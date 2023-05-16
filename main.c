@@ -35,11 +35,14 @@ _Bool addQuestion(questionsCollection* questions, questionSet* question) {
         return 0;
     }
 
-    
-
+    unsigned int firstNullLocation = getFirstNullLocation(questions);
     unsigned int nextAvailableSpace = (*questions).size;
-    (*questions).list[nextAvailableSpace] = question;
+
+    unsigned int location = firstNullLocation ? firstNullLocation : nextAvailableSpace;
+    (*questions).list[location] = question;
     (*questions).size++;
+
+    printf("Added at position %d.\n", location);
 
     return 1;
 }
@@ -79,13 +82,21 @@ int main(void) {
     addQuestion(&questions, question4);
     addQuestion(&questions, question5);
 
-    viewQuestions(questions);
-
-    delete(&questions, 1);
+    printf("%d\n", getFirstNullLocation(&questions));
 
     viewQuestions(questions);
 
-    //printf("%d\n", getFirstNullLocation(&questions));
+    deleteQuestions(&questions, 3);
+
+    viewQuestions(questions);
+
+    checkIfElementIsNull(questions);
+
+    addQuestion(&questions, question5);
+
+    viewQuestions(questions);
+
+    askQuestion(questions);
 
     return 0;
 }
