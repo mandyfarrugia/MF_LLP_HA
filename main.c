@@ -2,7 +2,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
+#include <time.h> 
 
 #include "questions.h"
 
@@ -22,16 +23,9 @@ void checkIfElementIsNull(questionsCollection questions) {
     }
 }
 
-void deleteQuestion(questionsCollection* questions, unsigned int index) {
-    if(index < 0 || index > ((*questions).max) - 1) {
-        printf("Index %d is outside the bounds of the array!\n", index);
-        return;
-    }
-
-    if((*questions).list[index] != NULL) {
-        free((*questions).list[index]);
-        (*questions).list[index] = NULL;
-    }
+questionSet askQuestion(questionsCollection questions) {
+    time_t t;
+    srand(time(&t));
 }
 
 int main(void) {
@@ -47,10 +41,10 @@ int main(void) {
     strcpy((*question2).answer, "Offers a wider range of positive values.");
     
     /* 
-        printf("Question: %s\nAnswer: %s\n", (*question).question, (*question).answer);
+    printf("Question: %s\nAnswer: %s\n", (*question).question, (*question).answer);
 
-        questions.list[0] = question;
-        printf("%s", questions.list[0]->question); */
+    questions.list[0] = question;
+    printf("%s", questions.list[0]->question); */
 
     questions.list[0] = question1;
     questions.list[1] = question2;
