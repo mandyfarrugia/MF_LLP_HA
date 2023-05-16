@@ -7,44 +7,10 @@
 
 #include "questions.h"
 
-unsigned int getFirstNullLocation(questionsCollection* questions) {
-    _Bool isFirstNullLocationLocated = 0;
-    unsigned int index = 0;
-    unsigned int firstNullLocationIndex = 0;
-
-    do {
-        if((*questions).list[index] == NULL) {
-            firstNullLocationIndex = index;
-            isFirstNullLocationLocated = 1;
-        }
-
-        index++;
-    } while(!isFirstNullLocationLocated && index < (*questions).max);
-
-    return firstNullLocationIndex;
-}
-
 void checkIfElementIsNull(questionsCollection questions) {
     for(unsigned int index = 0; index < questions.max; index++) {
         printf("%d - %d\n", index, questions.list[index] == NULL);
     }
-}
-
-_Bool addQuestion(questionsCollection* questions, questionSet* question) {
-    if((*questions).size == (*questions).max) {
-        return 0;
-    }
-
-    unsigned int firstNullLocation = getFirstNullLocation(questions);
-    unsigned int nextAvailableSpace = (*questions).size;
-
-    unsigned int location = firstNullLocation ? firstNullLocation : nextAvailableSpace;
-    (*questions).list[location] = question;
-    (*questions).size++;
-
-    printf("Added at position %d.\n", location);
-
-    return 1;
 }
 
 int main(void) {
@@ -89,6 +55,8 @@ int main(void) {
     deleteQuestions(&questions, 3);
 
     viewQuestions(questions);
+
+    deleteQuestions(&questions, 4);
 
     checkIfElementIsNull(questions);
 

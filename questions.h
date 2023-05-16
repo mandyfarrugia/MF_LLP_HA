@@ -18,7 +18,8 @@ questionsCollection initQuestions(unsigned int max);
 void viewQuestion(questionSet question);
 void viewQuestions(questionsCollection questions);
 void askQuestion(questionsCollection questions);
-//_Bool addQuestion(questionsCollection* questions, questionSet question);
+unsigned int getFirstNullLocation(questionsCollection* questions);
+_Bool addQuestion(questionsCollection* questions, questionSet* question);
 void deleteQuestions(questionsCollection* questions, unsigned int questionNumber);
 
 questionsCollection initQuestions(unsigned int max) {
@@ -47,7 +48,6 @@ void askQuestion(questionsCollection questions) {
     srand(time(&t));
 
     unsigned int randomIndex = rand() % questions.max;
-    printf("%d\n", randomIndex);
 
     if(questions.list[randomIndex] != NULL) {
         questionSet questionAtRandomPosition = *(questions.list[randomIndex]);
@@ -57,9 +57,37 @@ void askQuestion(questionsCollection questions) {
     }
 }
 
-// _Bool addQuestion(questionsCollection* questions, questionSet question) {
-//     return 1;
-// }
+unsigned int getFirstNullLocation(questionsCollection* questions) {
+    _Bool isFirstNullLocationLocated = 0;
+    unsigned int index = 0;
+    unsigned int firstNullLocationIndex = 0;
+
+    do {
+        if((*questions).list[index] == NULL) {
+            firstNullLocationIndex = index;
+            isFirstNullLocationLocated = 1;
+        }
+
+        index++;
+    } while(!isFirstNullLocationLocated && index < (*questions).max);
+
+    return firstNullLocationIndex;
+}
+
+_Bool addQuestion(questionsCollection* questions, questionSet* question) {
+    if((*questions).size == (*questions).max) {
+        return 0;
+    }
+
+    unsigned int firstNullLocation = getFirstNullLocation(questions);
+    unsigned int nextAvailableSpace = (*questions).size;
+
+    unsigned int location = firstNullLocation ? firstNullLocation : nextAvailableSpace;
+    (*questions).list[location] = question;
+    (*questions).size++;
+
+    return 1;
+}
 
 void deleteQuestions(questionsCollection* questions, unsigned int questionNumber) {
     for(unsigned int index = 0; index < (*questions).size; index++) {
