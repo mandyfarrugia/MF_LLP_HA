@@ -2,8 +2,8 @@
 
 typedef struct questionSet {
     unsigned int questionNumber;
-    char question[100];
-    char answer[100];
+    char question[400];
+    char answer[400];
 } questionSet;
 
 typedef questionSet** question;
@@ -17,7 +17,7 @@ typedef struct questionsCollection {
 questionsCollection initQuestions(unsigned int max);
 void viewQuestion(questionSet question);
 void viewQuestions(questionsCollection questions);
-_Bool addQuestion(questionsCollection* questions, questionSet question);
+//_Bool addQuestion(questionsCollection* questions, questionSet question);
 void deleteQuestion(questionsCollection* questions, unsigned int index);
 
 questionsCollection initQuestions(unsigned int max) {
@@ -33,7 +33,7 @@ void viewQuestion(questionSet question) {
 }
 
 void viewQuestions(questionsCollection questions) {
-    for(unsigned int index = 0; index < questions.max; index++) {
+    for(unsigned int index = 0; index < questions.size; index++) {
         if(questions.list[index] != NULL) {
             questionSet* question = questions.list[index];
             viewQuestion(*question);
@@ -41,9 +41,9 @@ void viewQuestions(questionsCollection questions) {
     }
 }
 
-_Bool addQuestion(questionsCollection* questions, questionSet question) {
-    return 1;
-}
+// _Bool addQuestion(questionsCollection* questions, questionSet question) {
+//     return 1;
+// }
 
 void deleteQuestion(questionsCollection* questions, unsigned int index) {
     if(index < 0 || index > ((*questions).max) - 1) {
@@ -52,7 +52,7 @@ void deleteQuestion(questionsCollection* questions, unsigned int index) {
     }
 
     if((*questions).list[index] == NULL) {
-        printf("Cannot delete at a position which is already null!");
+        printf("Cannot delete at a position which is already null!\n");
         return;
     } else {
         free((*questions).list[index]);
