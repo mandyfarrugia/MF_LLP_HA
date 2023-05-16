@@ -7,16 +7,23 @@ typedef struct questionSet {
 
 typedef questionSet** question;
 
-typedef struct questions {
+typedef struct questionsCollection {
     question list;
     unsigned int size;
     unsigned int max;
-} questions;
+} questionsCollection;
 
-questions initQuestions(unsigned int max) {
-    questions questionsCollection;
-    questionsCollection.list = (question)malloc(max * sizeof(questionSet));
-    questionsCollection.size = 0;
-    questionsCollection.max = max;
-    return questionsCollection;
+questionsCollection initQuestions(unsigned int max);
+_Bool addQuestion(questionsCollection* questions, questionSet question);
+
+questionsCollection initQuestions(unsigned int max) {
+    questionsCollection questions;
+    questions.list = (question)malloc(max * sizeof(questionSet));
+    questions.size = 0;
+    questions.max = max;
+    return questions;
+}
+
+_Bool addQuestion(questionsCollection* questions, questionSet question) {
+    return 1;
 }
