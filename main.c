@@ -7,19 +7,19 @@
 
 #include "questions.h"
 
-unsigned int getFirstNullLocation(questionsCollection questions) {
+unsigned int getFirstNullLocation(questionsCollection* questions) {
     _Bool isFirstNullLocationLocated = 0;
     unsigned int index = 0;
     unsigned int firstNullLocationIndex = 0;
 
-    while(!isFirstNullLocationLocated && index < questions.max) {
-        if(questions.list[index] == NULL) {
+    do {
+        if((*questions).list[index] == NULL) {
             firstNullLocationIndex = index;
             isFirstNullLocationLocated = 1;
         }
 
         index++;
-    }
+    } while(!isFirstNullLocationLocated && index < (*questions).max);
 
     return firstNullLocationIndex;
 }
@@ -30,31 +30,16 @@ void checkIfElementIsNull(questionsCollection questions) {
     }
 }
 
-void askQuestion(questionsCollection questions) {
-    time_t t;
-    srand(time(&t));
-
-    unsigned int randomIndex = rand() % questions.max;
-    printf("%d\n", randomIndex);
-
-    if(questions.list[randomIndex] != NULL) {
-        questionSet questionAtRandomPosition = *(questions.list[randomIndex]);
-        printf("Index: %d\nQuestion: %s\nAnswer: %s\n", randomIndex, questionAtRandomPosition.question, questionAtRandomPosition.answer);
-    } else {
-        printf("No question at index %d.\n", randomIndex);
-    }
-}
-
 _Bool addQuestion(questionsCollection* questions, questionSet* question) {
     if((*questions).size == (*questions).max) {
         return 0;
     }
 
-    unsigned int nextAvailableSpace = (*questions).size;
-    unsigned int firstNullLocation = getFirstNullLocation(questions);
+    
 
-    unsigned int location = firstNullLocation ? firstNullLocation : nextAvailableSpace;
-    printf("%d\n", location);
+    unsigned int nextAvailableSpace = (*questions).size;
+    (*questions).list[nextAvailableSpace] = question;
+    (*questions).size++;
 
     return 1;
 }
@@ -93,8 +78,14 @@ int main(void) {
     addQuestion(&questions, question3);
     addQuestion(&questions, question4);
     addQuestion(&questions, question5);
-    
+
     viewQuestions(questions);
+
+    delete(&questions, 1);
+
+    viewQuestions(questions);
+
+    //printf("%d\n", getFirstNullLocation(&questions));
 
     return 0;
 }

@@ -17,8 +17,9 @@ typedef struct questionsCollection {
 questionsCollection initQuestions(unsigned int max);
 void viewQuestion(questionSet question);
 void viewQuestions(questionsCollection questions);
+void askQuestion(questionsCollection questions);
 //_Bool addQuestion(questionsCollection* questions, questionSet question);
-void deleteQuestion(questionsCollection* questions, unsigned int index);
+void deleteQuestions(questionsCollection* questions, unsigned int questionNumber);
 
 questionsCollection initQuestions(unsigned int max) {
     questionsCollection questions;
@@ -41,21 +42,35 @@ void viewQuestions(questionsCollection questions) {
     }
 }
 
+void askQuestion(questionsCollection questions) {
+    time_t t;
+    srand(time(&t));
+
+    unsigned int randomIndex = rand() % questions.max;
+    printf("%d\n", randomIndex);
+
+    if(questions.list[randomIndex] != NULL) {
+        questionSet questionAtRandomPosition = *(questions.list[randomIndex]);
+        printf("Index: %d\nQuestion: %s\nAnswer: %s\n", randomIndex, questionAtRandomPosition.question, questionAtRandomPosition.answer);
+    } else {
+        printf("No question at index %d.\n", randomIndex);
+    }
+}
+
 // _Bool addQuestion(questionsCollection* questions, questionSet question) {
 //     return 1;
 // }
 
-void deleteQuestion(questionsCollection* questions, unsigned int index) {
-    if(index < 0 || index > ((*questions).max) - 1) {
-        printf("Index %d is outside the bounds of the array!\n", index);
-        return;
-    }
+void deleteQuestions(questionsCollection* questions, unsigned int questionNumber) {
+    for(unsigned int index = 0; index < (*questions).size; index++) {
+        if((*questions).list[index] != NULL) {
+            questionSet* questionByQuestionNumber = (*questions).list[index]; 
 
-    if((*questions).list[index] == NULL) {
-        printf("Cannot delete at a position which is already null!\n");
-        return;
-    } else {
-        free((*questions).list[index]);
-        (*questions).list[index] = NULL;
+            if((*questionByQuestionNumber).questionNumber == questionNumber) {
+                free((*questions).list[index]);
+                (*questions).list[index] = NULL;
+                (*questions).size--;
+            }
+        }
     }
 }
