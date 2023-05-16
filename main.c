@@ -16,6 +16,24 @@ void viewQuestions(questionsCollection questions) {
     }
 }
 
+void checkIfElementIsNull(questionsCollection questions) {
+    for(unsigned int index = 0; index < questions.max; index++) {
+        printf("%d - %d\n", index, questions.list[index] == NULL);
+    }
+}
+
+void deleteQuestion(questionsCollection* questions, unsigned int index) {
+    if(index < 0 || index > ((*questions).max) - 1) {
+        printf("Index %d is outside the bounds of the array!\n", index);
+        return;
+    }
+
+    if((*questions).list[index] != NULL) {
+        free((*questions).list[index]);
+        (*questions).list[index] = NULL;
+    }
+}
+
 int main(void) {
     questionsCollection questions = initQuestions(10);
     printf("Your collection currently has %d questions.\n\n", questions.max);
@@ -37,6 +55,14 @@ int main(void) {
     questions.list[0] = question1;
     questions.list[1] = question2;
     viewQuestions(questions);
+
+    checkIfElementIsNull(questions);
+
+    deleteQuestion(&questions, -1);
+    deleteQuestion(&questions, 10);
+
+    deleteQuestion(&questions, 1);
+    checkIfElementIsNull(questions);
 
     return 0;
 }

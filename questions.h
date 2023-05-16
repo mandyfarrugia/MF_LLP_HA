@@ -15,6 +15,7 @@ typedef struct questionsCollection {
 
 questionsCollection initQuestions(unsigned int max);
 _Bool addQuestion(questionsCollection* questions, questionSet question);
+void deleteQuestion(questionsCollection* questions, unsigned int index);
 
 questionsCollection initQuestions(unsigned int max) {
     questionsCollection questions;
@@ -26,4 +27,19 @@ questionsCollection initQuestions(unsigned int max) {
 
 _Bool addQuestion(questionsCollection* questions, questionSet question) {
     return 1;
+}
+
+void deleteQuestion(questionsCollection* questions, unsigned int index) {
+    if(index < 0 || index > ((*questions).max) - 1) {
+        printf("Index %d is outside the bounds of the array!\n", index);
+        return;
+    }
+
+    if((*questions).list[index] == NULL) {
+        printf("Cannot delete at a position which is already null!");
+        return;
+    } else {
+        free((*questions).list[index]);
+        (*questions).list[index] = NULL;
+    }
 }
