@@ -7,20 +7,20 @@
 
 #include "questions.h"
 
-void getMenuOptions() {
+char** getMenuOptions() {
     char staticOptions[6][30] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
     size_t optionsCount =  sizeof(staticOptions) / sizeof(staticOptions[0]);
     char** menuOptions = (char**)malloc(optionsCount * sizeof(char*));
 
-    for(unsigned int index = 0; index < optionsCount; index++) {
-        size_t lengthOfOption = strlen(staticOptions[index]);
-        menuOptions[index] = (char*)malloc(lengthOfOption * sizeof(char));
-        strcpy(menuOptions[index], staticOptions[index]);
+    if(menuOptions) {
+        for(unsigned int index = 0; index < optionsCount; index++) {
+            size_t lengthOfOption = strlen(staticOptions[index]);
+            menuOptions[index] = (char*)malloc(lengthOfOption * sizeof(char));
+            strcpy(menuOptions[index], staticOptions[index]);
+        }
     }
 
-    for(unsigned int index = 0; index < optionsCount; index++) {
-        printf("%s\n", menuOptions[index]);
-    }
+    return menuOptions;
 }
 
 int main(void) {
@@ -95,7 +95,7 @@ int main(void) {
     // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
     // printf("You have %d questions.\n\n", questions.size);
 
-    getMenuOptions();
+    printf("%s", *(getMenuOptions() + 1));
 
     return 0;
 }
