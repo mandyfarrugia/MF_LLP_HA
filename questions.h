@@ -6,10 +6,10 @@ typedef struct questionSet {
     char answer[400];
 } questionSet;
 
-typedef questionSet** question;
+typedef questionSet** questionPtr;
 
 typedef struct questionsCollection {
-    question list;
+    questionPtr list;
     unsigned int size;
     unsigned int max;
 } questionsCollection;
@@ -24,10 +24,19 @@ void deleteQuestions(questionsCollection* questions, unsigned int questionNumber
 
 questionsCollection initQuestions(unsigned int max) {
     questionsCollection questions;
-    questions.list = (question)malloc(max * sizeof(questionSet));
+    questions.list = (questionPtr)malloc(max * sizeof(questionSet));
     questions.size = 0;
     questions.max = max;
+
+    for(unsigned int index = 0; index < questions.max; index++) {
+        questions.list[index] = NULL;
+    }
+
     return questions;
+}
+
+_Bool isEmpty(questionsCollection questions) {
+    return !questions.size;
 }
 
 void viewQuestion(questionSet question) {
@@ -76,7 +85,19 @@ unsigned int getFirstNullLocation(questionsCollection* questions) {
 
 _Bool addQuestion(questionsCollection* questions, questionSet* question) {
     if((*questions).size == (*questions).max) {
-        return 0;
+        unsigned int doubledMax = (*questions).max * 2;
+        (*questions).list = (questionPtr)realloc((*questions).list, doubledMax * sizeof(questionSet));
+
+        if((*questions).list) {
+            for(unsigned int index = (*questions).size; index < doubledMax; index++) {
+                (*questions).list[index] = NULL;
+            }
+
+            (*questions).max = doubledMax;
+        }
+        else {
+            return 0;
+        }
     }
 
     unsigned int firstNullLocation = getFirstNullLocation(questions);

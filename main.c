@@ -15,7 +15,8 @@ void checkIfElementIsNull(questionsCollection questions) {
 
 int main(void) {
     questionsCollection questions = initQuestions(5);
-    printf("Your collection currently has %d questions.\n\n", questions.max);
+    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    printf("You have %d questions.\n\n", questions.size);
 
     questionSet* question1 = (questionSet*)malloc(1 * sizeof(questionSet));
     (*question1).questionNumber = 1;
@@ -42,29 +43,47 @@ int main(void) {
     strcpy((*question5).question, "What does the preprocessor do?");
     strcpy((*question5).answer, "Removes comments and whitespace, expands macros and included header files, and obeys preprocessor directives.");
 
+    printf("Is collection empty: %d\n", isEmpty(questions));
+
     addQuestion(&questions, question1);
     addQuestion(&questions, question2);
     addQuestion(&questions, question3);
     addQuestion(&questions, question4);
     addQuestion(&questions, question5);
 
-    printf("%d\n", getFirstNullLocation(&questions));
+    printf("Is collection empty: %d\n", isEmpty(questions));
+
+    questionSet* question6 = (questionSet*)malloc(1 * sizeof(questionSet));
+    (*question6).questionNumber = 6;
+    strcpy((*question6).question, "Does a static array allow growing and shrinking?");
+    strcpy((*question6).answer, "No, a static array is of a fixed size.");
+
+    addQuestion(&questions, question6);
+
+    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    printf("You have %d questions.\n\n", questions.size);
+
+    addQuestion(&questions, question6);
+    addQuestion(&questions, question6);
+    addQuestion(&questions, question6);
+    addQuestion(&questions, question6);
+
+    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    printf("You have %d questions.\n\n", questions.size);
+
+    addQuestion(&questions, question6);
+
+    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    printf("You have %d questions.\n\n", questions.size);
 
     viewQuestions(questions);
 
-    deleteQuestions(&questions, 3);
+    deleteQuestions(&questions, 5);
 
     viewQuestions(questions);
 
-    deleteQuestions(&questions, 4);
-
-    checkIfElementIsNull(questions);
-
-    addQuestion(&questions, question5);
-
-    viewQuestions(questions);
-
-    askQuestion(questions);
+    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    printf("You have %d questions.\n\n", questions.size);
 
     return 0;
 }
