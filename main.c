@@ -7,9 +7,19 @@
 
 #include "questions.h"
 
-void checkIfElementIsNull(questionsCollection questions) {
-    for(unsigned int index = 0; index < questions.max; index++) {
-        printf("%d - %d\n", index, questions.list[index] == NULL);
+void getMenuOptions() {
+    char staticOptions[6][30] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
+    size_t optionsCount =  sizeof(staticOptions) / sizeof(staticOptions[0]);
+    char** menuOptions = (char**)malloc(optionsCount * sizeof(char*));
+
+    for(unsigned int index = 0; index < optionsCount; index++) {
+        size_t lengthOfOption = strlen(staticOptions[index]);
+        menuOptions[index] = (char*)malloc(lengthOfOption * sizeof(char));
+        strcpy(menuOptions[index], staticOptions[index]);
+    }
+
+    for(unsigned int index = 0; index < optionsCount; index++) {
+        printf("%s\n", menuOptions[index]);
     }
 }
 
@@ -58,32 +68,34 @@ int main(void) {
     strcpy((*question6).question, "Does a static array allow growing and shrinking?");
     strcpy((*question6).answer, "No, a static array is of a fixed size.");
 
-    addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
 
-    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    printf("You have %d questions.\n\n", questions.size);
+    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    // printf("You have %d questions.\n\n", questions.size);
 
-    addQuestion(&questions, question6);
-    addQuestion(&questions, question6);
-    addQuestion(&questions, question6);
-    addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
 
-    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    printf("You have %d questions.\n\n", questions.size);
+    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    // printf("You have %d questions.\n\n", questions.size);
 
-    addQuestion(&questions, question6);
+    // addQuestion(&questions, question6);
 
-    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    printf("You have %d questions.\n\n", questions.size);
+    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    // printf("You have %d questions.\n\n", questions.size);
 
-    viewQuestions(questions);
+    // viewQuestions(questions);
 
-    deleteQuestions(&questions, 5);
+    // deleteQuestions(&questions, 5);
 
-    viewQuestions(questions);
+    // viewQuestions(questions);
 
-    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    printf("You have %d questions.\n\n", questions.size);
+    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
+    // printf("You have %d questions.\n\n", questions.size);
+
+    getMenuOptions();
 
     return 0;
 }
