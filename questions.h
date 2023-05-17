@@ -40,7 +40,7 @@ _Bool isEmpty(questionsCollection questions) {
 }
 
 void viewQuestion(questionSet question) {
-    printf("Question number: %d\nQuestion: %s\nAnswer: %s\n\n", question.questionNumber, question.question, question.answer);
+    printf("Question number: %u\nQuestion: %s\nAnswer: %s\n\n", question.questionNumber, question.question, question.answer);
 }
 
 void viewQuestions(questionsCollection questions) {

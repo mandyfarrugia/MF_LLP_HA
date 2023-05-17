@@ -7,13 +7,14 @@
 
 #include "questions.h"
 
+#define MENU_OPTIONS 6
+
 char** getMenuOptions() {
-    char staticOptions[6][30] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
-    size_t optionsCount =  sizeof(staticOptions) / sizeof(staticOptions[0]);
-    char** menuOptions = (char**)malloc(optionsCount * sizeof(char*));
+    char staticOptions[MENU_OPTIONS][30] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
+    char** menuOptions = (char**)malloc(MENU_OPTIONS * sizeof(char*));
 
     if(menuOptions) {
-        for(unsigned int index = 0; index < optionsCount; index++) {
+        for(unsigned int index = 0; index < MENU_OPTIONS; index++) {
             size_t lengthOfOption = strlen(staticOptions[index]);
             menuOptions[index] = (char*)malloc(lengthOfOption * sizeof(char));
             strcpy(menuOptions[index], staticOptions[index]);
@@ -23,10 +24,18 @@ char** getMenuOptions() {
     return menuOptions;
 }
 
+void displayMenu(char** menuOptions) {
+    if(!menuOptions)
+        return;
+
+    for(unsigned int index = 0; index < MENU_OPTIONS; index++)
+        printf("%u. %s\n", (index + 1), *(menuOptions + index));
+
+    printf("Enter choice: ");
+}
+
 int main(void) {
     questionsCollection questions = initQuestions(5);
-    printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    printf("You have %d questions.\n\n", questions.size);
 
     questionSet* question1 = (questionSet*)malloc(1 * sizeof(questionSet));
     (*question1).questionNumber = 1;
@@ -53,7 +62,7 @@ int main(void) {
     strcpy((*question5).question, "What does the preprocessor do?");
     strcpy((*question5).answer, "Removes comments and whitespace, expands macros and included header files, and obeys preprocessor directives.");
 
-    printf("Is collection empty: %d\n", isEmpty(questions));
+    // printf("Is collection empty: %d\n", isEmpty(questions));
 
     addQuestion(&questions, question1);
     addQuestion(&questions, question2);
@@ -61,12 +70,14 @@ int main(void) {
     addQuestion(&questions, question4);
     addQuestion(&questions, question5);
 
-    printf("Is collection empty: %d\n", isEmpty(questions));
+    viewQuestions(questions);
 
-    questionSet* question6 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question6).questionNumber = 6;
-    strcpy((*question6).question, "Does a static array allow growing and shrinking?");
-    strcpy((*question6).answer, "No, a static array is of a fixed size.");
+    // printf("Is collection empty: %d\n", isEmpty(questions));
+
+    // questionSet* question6 = (questionSet*)malloc(1 * sizeof(questionSet));
+    // (*question6).questionNumber = 6;
+    // strcpy((*question6).question, "Does a static array allow growing and shrinking?");
+    // strcpy((*question6).answer, "No, a static array is of a fixed size.");
 
     // addQuestion(&questions, question6);
 
@@ -95,7 +106,8 @@ int main(void) {
     // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
     // printf("You have %d questions.\n\n", questions.size);
 
-    printf("%s", *(getMenuOptions() + 1));
+    char** menuOptions = getMenuOptions();
+    displayMenu(menuOptions);
 
     return 0;
 }
