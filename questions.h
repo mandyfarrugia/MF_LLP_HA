@@ -1,9 +1,12 @@
 #pragma once
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 typedef struct questionSet {
     unsigned int questionNumber;
     char question[400];
-    char answer[400];
 } questionSet;
 
 typedef questionSet** questionPtr;
@@ -14,24 +17,31 @@ typedef struct questionsCollection {
     unsigned int max;
 } questionsCollection;
 
-questionsCollection initQuestions(unsigned int max);
+questionsCollection initialiseCollection();
+_Bool isEmpty(questionsCollection questions);
 void viewQuestion(questionSet question);
 void viewQuestions(questionsCollection questions);
 void askQuestion(questionsCollection questions);
 unsigned int getFirstNullLocation(questionsCollection* questions);
-_Bool addQuestion(questionsCollection* questions, questionSet* question);
-void deleteQuestions(questionsCollection* questions, unsigned int questionNumber);
+_Bool addQuestion(questionsCollection* questions, questionSet question);
+_Bool resizeQuestionsCollection(questionsCollection* questions);
+_Bool deleteQuestion(questionsCollection* questions, unsigned int questionNumber);
+_Bool writeQuestionsToBinaryFile(questionsCollection questions, FILE* file);
+unsigned int readQuestionsFromBinaryFile(questionsCollection* questions, FILE* file);
+void shuffleQuestions(questionsCollection* questions);
+void destroyCollection(questionsCollection* questions);
+void flushBuffer();
 
-questionsCollection initQuestions(unsigned int max) {
+questionsCollection initialiseCollection() {
     questionsCollection questions;
-    questions.list = (questionPtr)malloc(max * sizeof(questionSet));
-    questions.size = 0;
-    questions.max = max;
+    questions.max = 10;
+    questions.list = (questionPtr)malloc((questions.max) * sizeof(questionSet));
 
     for(unsigned int index = 0; index < questions.max; index++) {
         questions.list[index] = NULL;
     }
 
+    questions.size = 0;
     return questions;
 }
 
@@ -40,10 +50,13 @@ _Bool isEmpty(questionsCollection questions) {
 }
 
 void viewQuestion(questionSet question) {
-    printf("Question number: %u\nQuestion: %s\nAnswer: %s\n\n", question.questionNumber, question.question, question.answer);
+    printf("\nQuestion number: %u\nQuestion: %s\n", question.questionNumber, question.question);
 }
 
 void viewQuestions(questionsCollection questions) {
+    if(isEmpty(questions))
+        return;
+
     for(unsigned int index = 0; index < questions.size; index++) {
         if(questions.list[index] != NULL) {
             questionSet* question = questions.list[index];
@@ -83,43 +96,116 @@ unsigned int getFirstNullLocation(questionsCollection* questions) {
     return firstNullLocationIndex;
 }
 
-_Bool addQuestion(questionsCollection* questions, questionSet* question) {
+_Bool addQuestion(questionsCollection* questions, questionSet question) {
     if((*questions).size == (*questions).max) {
-        unsigned int doubledMax = (*questions).max * 2;
-        (*questions).list = (questionPtr)realloc((*questions).list, doubledMax * sizeof(questionSet));
-
-        if((*questions).list) {
-            for(unsigned int index = (*questions).size; index < doubledMax; index++) {
-                (*questions).list[index] = NULL;
-            }
-
-            (*questions).max = doubledMax;
-        }
-        else {
-            return 0;
-        }
+        resizeQuestionsCollection(questions);
     }
 
     unsigned int firstNullLocation = getFirstNullLocation(questions);
     unsigned int nextAvailableSpace = (*questions).size;
 
     unsigned int location = firstNullLocation ? firstNullLocation : nextAvailableSpace;
-    (*questions).list[location] = question;
+    (*questions).list[location] = (questionSet*)malloc(1 * sizeof(questionSet));
+    *((*questions).list[location]) = question;
     (*questions).size++;
 
     return 1;
 }
 
-void deleteQuestions(questionsCollection* questions, unsigned int questionNumber) {
+_Bool resizeQuestionsCollection(questionsCollection* questions) {
+    unsigned int doubledMax = (*questions).max * 2;
+    (*questions).list = (questionPtr)realloc((*questions).list, doubledMax * sizeof(questionSet));
+
+    if((*questions).list) {
+        for(unsigned int index = (*questions).size; index < doubledMax; index++) {
+            (*questions).list[index] = NULL;
+        }
+
+        (*questions).max = doubledMax;
+    }
+    else {
+        return 0;
+    }
+
+    return (*questions).list != NULL;
+}
+
+_Bool deleteQuestion(questionsCollection* questions, unsigned int questionNumber) {
+    _Bool isQuestionDeleted = 0;
+
     for(unsigned int index = 0; index < (*questions).size; index++) {
         if((*questions).list[index] != NULL) {
-            questionSet* questionByQuestionNumber = (*questions).list[index]; 
+            questionSet* questionByQuestionNumber = (*questions).list[index];
 
             if((*questionByQuestionNumber).questionNumber == questionNumber) {
                 free((*questions).list[index]);
                 (*questions).list[index] = NULL;
                 (*questions).size--;
+                isQuestionDeleted = 1;
             }
         }
     }
+
+    return isQuestionDeleted;
+}
+
+_Bool writeQuestionsToBinaryFile(questionsCollection questions, FILE* file) {
+    for (unsigned int index = 0; index < questions.size; index++) {
+        if(questions.list[index] != NULL) {
+            questionSet element = *(questions).list[index];
+            fwrite(&element, sizeof(element), 1, file);
+        }
+    }
+
+    fclose(file);
+
+    return file != NULL;
+}
+
+unsigned int readQuestionsFromBinaryFile(questionsCollection* questions, FILE* file) {
+    unsigned int questionsRead = 0;
+
+    questionSet questionToRead;
+    while(fread(&questionToRead, sizeof(questionToRead), 1, file)) {
+        addQuestion(questions, questionToRead);
+        questionsRead++;
+    }
+
+    (*questions).max = questionsRead;
+    (*questions).list = (questionPtr)realloc((*questions).list, ((*questions).max) * sizeof(questionSet));
+
+    fclose(file);
+
+    return (*questions).size;
+}
+
+void shuffleQuestions(questionsCollection* questions) {
+    if(isEmpty(*(questions))) {
+        printf("Cannot shuffle an empty collection!");
+        return;
+    }
+
+    time_t t;
+    srand(time(&t));
+
+    questionSet* temporaryQuestion;
+    for(unsigned int i = (*questions).size - 1; i > 0; i--) {
+        unsigned int j = rand() % (i + 1);
+        temporaryQuestion = (*questions).list[j];
+        (*questions).list[j] = (*questions).list[i];
+        (*questions).list[i] = temporaryQuestion;
+    }
+}
+
+void destroyCollection(questionsCollection* questions) {
+    for (unsigned int index = 0; index < (*questions).max; index++) {
+        free((*questions).list[index]);
+    }
+
+    free((*questions).list);
+}
+
+void flushBuffer() {
+    char character;
+    while((character = getchar()) != '\n' && character != EOF);
 }

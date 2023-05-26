@@ -1,22 +1,103 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include "interview.h"
+
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> 
-
-#include "questions.h"
 
 #define MENU_OPTIONS 6
+#define MAX_OPTIONS_CHARS 30
+
+void getNumericInput(char* prompt, unsigned int* numericInput, int check) {
+    do {
+        flushBuffer();
+
+        printf("\n%s: ", prompt);
+        check = scanf("%u", numericInput);
+
+        if (check < 1) {
+            printf("Invalid input detected!\n");
+        }
+    } while (check < 1);
+}
+
+void prepareAddQuestion(questionsCollection* questions, int check) {
+    unsigned int questionNumber = 0;
+
+    getNumericInput("Enter the number to be associated with the question", &questionNumber, check);
+
+    char* question = (char*)malloc(100 * sizeof(char));
+
+    do {
+        flushBuffer();
+        printf("\nEnter a string: ");
+        scanf("%99[^\n]", question);
+        question = (char*)realloc(question, (strlen(question) + 1) * sizeof(char));
+        question[strlen(question)] = '\0';
+
+        if (!strlen(question)) {
+            printf("Please enter a valid question!\n");
+        }
+    } while (!strlen(question));
+
+    free(question);
+
+    questionSet questionToBeAdded;
+    questionToBeAdded.questionNumber = questionNumber;
+    strcpy(questionToBeAdded.question, question);
+}
+
+void prepareDeleteQuestion(questionsCollection* questions, int check) {
+    unsigned int questionNumberToDelete = 0;
+
+    do {
+        flushBuffer();
+
+        printf("\nEnter the number associated with the question you want to delete: ");
+        check = scanf("%u", &questionNumberToDelete);
+
+        if (check < 1) {
+            printf("Invalid input detected!\n");
+        }
+    } while (check < 1);
+
+    _Bool questionDeletedSuccessfully = deleteQuestion(questions, questionNumberToDelete);
+    printf("%s\n", questionDeletedSuccessfully ? "Question deleted successfully!" : "No question associated with this number can be found!");
+}
+
+void confirmBeforeExit(questionsCollection questions, FILE* file, _Bool* isProgramRunningFlag) {
+    char exitConfirmation;
+
+    do {
+        flushBuffer();
+
+        printf("\nAre you sure you want to exit? (Y/N): ");
+        scanf("%c", &exitConfirmation);
+        exitConfirmation = tolower(exitConfirmation);
+
+        if(exitConfirmation != 'y' && exitConfirmation != 'n') {
+            printf("Invalid input detected!\n");
+        }
+    } while(exitConfirmation != 'y' && exitConfirmation != 'n');
+
+    if(exitConfirmation == 'y') {
+        file = fopen("questions.dat", "wb");
+        writeQuestionsToBinaryFile(questions, file);
+        destroyCollection(&questions);
+        *isProgramRunningFlag = 0;
+    }
+}
 
 char** getMenuOptions() {
-    char staticOptions[MENU_OPTIONS][30] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
+    char staticOptions[MENU_OPTIONS][MAX_OPTIONS_CHARS] = {"View all questions", "Ask a question", "Add a question", "Delete a question", "Shuffle questions", "Save to file and exit"};
     char** menuOptions = (char**)malloc(MENU_OPTIONS * sizeof(char*));
 
     if(menuOptions) {
         for(unsigned int index = 0; index < MENU_OPTIONS; index++) {
             size_t lengthOfOption = strlen(staticOptions[index]);
-            menuOptions[index] = (char*)malloc(lengthOfOption * sizeof(char));
+            menuOptions[index] = (char*)malloc((lengthOfOption + 1) * sizeof(char));
             strcpy(menuOptions[index], staticOptions[index]);
         }
     }
@@ -28,86 +109,105 @@ void displayMenu(char** menuOptions) {
     if(!menuOptions)
         return;
 
-    for(unsigned int index = 0; index < MENU_OPTIONS; index++)
-        printf("%u. %s\n", (index + 1), *(menuOptions + index));
+    unsigned int index = 0;
 
-    printf("Enter choice: ");
+    char title[20] = "Interview questions";
+    printf("%s\n", title);
+    for(index = 0; index < strlen(title); index++) {
+        printf("=");
+        if(index == strlen(title) - 1)
+            printf("\n");
+    }
+
+    for(index = 0; index < MENU_OPTIONS; index++)
+        printf("%u. %s\n", (index + 1), *(menuOptions + index));
 }
 
-int main(void) {
-    questionsCollection questions = initQuestions(5);
+void addDummyStruct(questionsCollection* questions, unsigned int questionNumber, char* question) {
+    questionSet dummyQuestion;
+    dummyQuestion.questionNumber = questionNumber;
+    strcpy(dummyQuestion.question, question);
+    addQuestion(questions, dummyQuestion);
+}
 
-    questionSet* question1 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question1).questionNumber = 1;
-    strcpy((*question1).question, "Why is the null character used?");
-    strcpy((*question1).answer, "To render a valid C string.");
-    
-    questionSet* question2 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question2).questionNumber = 2;
-    strcpy((*question2).question, "What is the advantage of unsigned int in C?");
-    strcpy((*question2).answer, "Offers a wider range of positive values.");
+void initialiseCollectionFromDummyStructs(questionsCollection* questions) {
+    char interviewQuestions[10][90] = {
+            "Why is C called a mid-level programming language?",
+            "What are the features of the C language?",
+            "What is the use of printf() and scanf() functions?",
+            "What is a built-in function in C?",
+            "What is a preprocessor?",
+            "How can a string be converted to a number?",
+            "How can a number be converted to a string?",
+            "What is recursion in C?",
+            "Why doesn't C support function overloading?",
+            "What is the difference between global int and static int declaration?"
+    };
 
-    questionSet* question3 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question3).questionNumber = 3;
-    strcpy((*question3).question, "What is buffer overflow? How can it be avoided when working with C strings?");
-    strcpy((*question3).answer, "When you try to store more characters than your string variable can hold. Mitigations include field width (one less than the maximum size to allow space for null character) before the format specifier, or flush the buffer.");
+    size_t amountOfInterviewQuestions = sizeof(interviewQuestions) / sizeof(interviewQuestions[0]);
+    for (unsigned int index = 0; index < amountOfInterviewQuestions; index++) {
+        addDummyStruct(questions, (index + 1), interviewQuestions[index]);
+    }
+}
 
-    questionSet* question4 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question4).questionNumber = 4;
-    strcpy((*question4).question, "What are the four stages of compilation in C in the correct order?");
-    strcpy((*question4).answer, "Preprocessing, compilation, assembly, and linking.");
+int main() {
+    questionsCollection questions = initialiseCollection();
 
-    questionSet* question5 = (questionSet*)malloc(1 * sizeof(questionSet));
-    (*question5).questionNumber = 5;
-    strcpy((*question5).question, "What does the preprocessor do?");
-    strcpy((*question5).answer, "Removes comments and whitespace, expands macros and included header files, and obeys preprocessor directives.");
+    FILE* file = fopen("questions.dat", "rb");
+    if(!file) {
+        initialiseCollectionFromDummyStructs(&questions);
+    } else {
+        unsigned int questionsReadFromFile = readQuestionsFromBinaryFile(&questions, file);
 
-    // printf("Is collection empty: %d\n", isEmpty(questions));
+        if(!questionsReadFromFile) {
+            initialiseCollectionFromDummyStructs(&questions);
+        }
+    }
 
-    addQuestion(&questions, question1);
-    addQuestion(&questions, question2);
-    addQuestion(&questions, question3);
-    addQuestion(&questions, question4);
-    addQuestion(&questions, question5);
+    _Bool isProgramRunning = 1;
+    unsigned int choice = 0;
 
-    viewQuestions(questions);
+    do {
+        int check = 0;
 
-    // printf("Is collection empty: %d\n", isEmpty(questions));
+        char** menuOptions = getMenuOptions();
+        displayMenu(menuOptions);
 
-    // questionSet* question6 = (questionSet*)malloc(1 * sizeof(questionSet));
-    // (*question6).questionNumber = 6;
-    // strcpy((*question6).question, "Does a static array allow growing and shrinking?");
-    // strcpy((*question6).answer, "No, a static array is of a fixed size.");
+        do {
+            printf("\nEnter choice: ");
+            check = scanf("%u", &choice);
+            if(check < 1) {
+                printf("\nInvalid input detected!\n");
+                flushBuffer();
+            }
+        } while(check < 1);
 
-    // addQuestion(&questions, question6);
+        switch(choice) {
+            case 1:
+                viewQuestions(questions);
+                break;
+            case 2:
+                askQuestion(questions);
+                break;
+            case 3:
+                prepareAddQuestion(&questions, check);
+                break;
+            case 4:
+                prepareDeleteQuestion(&questions, check);
+                break;
+            case 5:
+                shuffleQuestions(&questions);
+                break;
+            case 6:
+                confirmBeforeExit(questions, file, &isProgramRunning);
+                break;
+            default:
+                printf("\nInvalid choice!\n");
+                break;
+        }
 
-    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    // printf("You have %d questions.\n\n", questions.size);
-
-    // addQuestion(&questions, question6);
-    // addQuestion(&questions, question6);
-    // addQuestion(&questions, question6);
-    // addQuestion(&questions, question6);
-
-    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    // printf("You have %d questions.\n\n", questions.size);
-
-    // addQuestion(&questions, question6);
-
-    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    // printf("You have %d questions.\n\n", questions.size);
-
-    // viewQuestions(questions);
-
-    // deleteQuestions(&questions, 5);
-
-    // viewQuestions(questions);
-
-    // printf("Your collection currently supports up to %d questions.\n\n", questions.max);
-    // printf("You have %d questions.\n\n", questions.size);
-
-    char** menuOptions = getMenuOptions();
-    displayMenu(menuOptions);
+        printf("\n");
+    } while(choice != 6 || isProgramRunning);
 
     return 0;
 }
