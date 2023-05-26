@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "interview.h"
+#include "questions.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -24,29 +24,22 @@ void getNumericInput(char* prompt, unsigned int* numericInput, int check) {
 }
 
 void prepareAddQuestion(questionsCollection* questions, int check) {
-    unsigned int questionNumber = 0;
+    questionSet questionToBeAdded;
 
-    getNumericInput("Enter the number to be associated with the question", &questionNumber, check);
-
-    char* question = (char*)malloc(100 * sizeof(char));
+    getNumericInput("Enter the number to be associated with the question", &questionToBeAdded.questionNumber, check);
 
     do {
         flushBuffer();
-        printf("\nEnter a string: ");
-        scanf("%99[^\n]", question);
-        question = (char*)realloc(question, (strlen(question) + 1) * sizeof(char));
-        question[strlen(question)] = '\0';
+        printf("\nEnter a question: ");
+        scanf("%399[^\n]", questionToBeAdded.question);
+        questionToBeAdded.question[strlen(questionToBeAdded.question)] = '\0';
 
-        if (!strlen(question)) {
+        if (!strlen(questionToBeAdded.question)) {
             printf("Please enter a valid question!\n");
         }
-    } while (!strlen(question));
+    } while (!strlen(questionToBeAdded.question));
 
-    free(question);
-
-    questionSet questionToBeAdded;
-    questionToBeAdded.questionNumber = questionNumber;
-    strcpy(questionToBeAdded.question, question);
+    addQuestion(questions, questionToBeAdded);
 }
 
 void prepareDeleteQuestion(questionsCollection* questions, int check) {
@@ -132,16 +125,16 @@ void addDummyStruct(questionsCollection* questions, unsigned int questionNumber,
 
 void initialiseCollectionFromDummyStructs(questionsCollection* questions) {
     char interviewQuestions[10][90] = {
-            "Why is C called a mid-level programming language?",
-            "What are the features of the C language?",
-            "What is the use of printf() and scanf() functions?",
-            "What is a built-in function in C?",
-            "What is a preprocessor?",
-            "How can a string be converted to a number?",
-            "How can a number be converted to a string?",
-            "What is recursion in C?",
-            "Why doesn't C support function overloading?",
-            "What is the difference between global int and static int declaration?"
+        "Why is C called a mid-level programming language?",
+        "What are the features of the C language?",
+        "What is the use of printf() and scanf() functions?",
+        "What is a built-in function in C?",
+        "What is a preprocessor?",
+        "How can a string be converted to a number?",
+        "How can a number be converted to a string?",
+        "What is recursion in C?",
+        "Why doesn't C support function overloading?",
+        "What is the difference between global int and static int declaration?"
     };
 
     size_t amountOfInterviewQuestions = sizeof(interviewQuestions) / sizeof(interviewQuestions[0]);
