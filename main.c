@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "questions.h"
+#include "interview.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -12,13 +12,12 @@
 
 void getNumericInput(char* prompt, unsigned int* numericInput, int check) {
     do {
-        flushBuffer();
-
         printf("\n%s: ", prompt);
         check = scanf("%u", numericInput);
 
         if (check < 1) {
             printf("Invalid input detected!\n");
+            flushBuffer();
         }
     } while (check < 1);
 }
@@ -26,36 +25,39 @@ void getNumericInput(char* prompt, unsigned int* numericInput, int check) {
 void prepareAddQuestion(questionsCollection* questions, int check) {
     questionSet questionToBeAdded;
 
-    getNumericInput("Enter the number to be associated with the question", &questionToBeAdded.questionNumber, check);
+    do {
+        flushBuffer();
+
+        printf("\nEnter the number to be associated with the question: ");
+        check = scanf("%u", &questionToBeAdded.questionNumber);
+
+        if (check < 1) {
+            printf("Invalid input detected!\n");
+        } else if(checkIfQuestionNumberExists(*questions, questionToBeAdded.questionNumber)) {
+            printf("There is already a question associated with this number!\n");
+        }
+    } while (check < 1 || checkIfQuestionNumberExists(*questions, questionToBeAdded.questionNumber));
 
     do {
         flushBuffer();
-        printf("\nEnter a question: ");
+        printf("\nEnter a string: ");
         scanf("%399[^\n]", questionToBeAdded.question);
         questionToBeAdded.question[strlen(questionToBeAdded.question)] = '\0';
 
         if (!strlen(questionToBeAdded.question)) {
             printf("Please enter a valid question!\n");
+        } else if(checkIfQuestionExists(*questions, questionToBeAdded.question)) {
+            printf("Question already exists!\n");
         }
-    } while (!strlen(questionToBeAdded.question));
+    } while (!strlen(questionToBeAdded.question) || checkIfQuestionExists(*questions, questionToBeAdded.question));
 
-    addQuestion(questions, questionToBeAdded);
+    _Bool questionAddedSuccessfully = addQuestion(questions, questionToBeAdded);
+    printf("\n%s\n", questionAddedSuccessfully ? "Question added successfully!" : "Unable to add question!");
 }
 
 void prepareDeleteQuestion(questionsCollection* questions, int check) {
     unsigned int questionNumberToDelete = 0;
-
-    do {
-        flushBuffer();
-
-        printf("\nEnter the number associated with the question you want to delete: ");
-        check = scanf("%u", &questionNumberToDelete);
-
-        if (check < 1) {
-            printf("Invalid input detected!\n");
-        }
-    } while (check < 1);
-
+    getNumericInput("Enter the number associated with the question you want to delete", &questionNumberToDelete, check);
     _Bool questionDeletedSuccessfully = deleteQuestion(questions, questionNumberToDelete);
     printf("%s\n", questionDeletedSuccessfully ? "Question deleted successfully!" : "No question associated with this number can be found!");
 }
@@ -166,14 +168,7 @@ int main() {
         char** menuOptions = getMenuOptions();
         displayMenu(menuOptions);
 
-        do {
-            printf("\nEnter choice: ");
-            check = scanf("%u", &choice);
-            if(check < 1) {
-                printf("\nInvalid input detected!\n");
-                flushBuffer();
-            }
-        } while(check < 1);
+        getNumericInput("Enter choice", &choice, check);
 
         switch(choice) {
             case 1:
@@ -195,7 +190,7 @@ int main() {
                 confirmBeforeExit(questions, file, &isProgramRunning);
                 break;
             default:
-                printf("\nInvalid choice!\n");
+                printf("Invalid choice!\n");
                 break;
         }
 

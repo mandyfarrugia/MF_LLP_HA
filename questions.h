@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 typedef struct questionSet {
@@ -29,6 +30,8 @@ _Bool deleteQuestion(questionsCollection* questions, unsigned int questionNumber
 _Bool writeQuestionsToBinaryFile(questionsCollection questions, FILE* file);
 unsigned int readQuestionsFromBinaryFile(questionsCollection* questions, FILE* file);
 void shuffleQuestions(questionsCollection* questions);
+_Bool checkIfQuestionNumberExists(questionsCollection questions, unsigned int questionNumber);
+_Bool checkIfQuestionExists(questionsCollection questions, char* question);
 void destroyCollection(questionsCollection* questions);
 void flushBuffer();
 
@@ -69,7 +72,7 @@ void askQuestion(questionsCollection questions) {
     time_t t;
     srand(time(&t));
 
-    unsigned int randomIndex = rand() % questions.max;
+    unsigned int randomIndex = rand() % questions.size;
 
     if(questions.list[randomIndex] != NULL) {
         questionSet questionAtRandomPosition = *(questions.list[randomIndex]);
@@ -98,7 +101,9 @@ unsigned int getFirstNullLocation(questionsCollection* questions) {
 
 _Bool addQuestion(questionsCollection* questions, questionSet question) {
     if((*questions).size == (*questions).max) {
-        resizeQuestionsCollection(questions);
+        _Bool collectionResizedSuccessfully = resizeQuestionsCollection(questions);
+        if(!collectionResizedSuccessfully)
+            return 0;
     }
 
     unsigned int firstNullLocation = getFirstNullLocation(questions);
@@ -195,6 +200,36 @@ void shuffleQuestions(questionsCollection* questions) {
         (*questions).list[j] = (*questions).list[i];
         (*questions).list[i] = temporaryQuestion;
     }
+}
+
+_Bool checkIfQuestionNumberExists(questionsCollection questions, unsigned int questionNumber) {
+    _Bool doesQuestionNumberExist = 0;
+
+    for(unsigned int index = 0; index < questions.size; index++) {
+        if(questions.list[index]) {
+            questionSet currentQuestion = *(questions.list[index]);
+            if(currentQuestion.questionNumber == questionNumber) {
+                doesQuestionNumberExist = 1;
+            }
+        }
+    }
+
+    return doesQuestionNumberExist;
+}
+
+_Bool checkIfQuestionExists(questionsCollection questions, char* question) {
+    _Bool doesQuestionExist = 0;
+
+    for(unsigned int index = 0; index < questions.size; index++) {
+        if(questions.list[index]) {
+            questionSet currentQuestion = *(questions.list[index]);
+            if(!strcmp(currentQuestion.question, question)) {
+                doesQuestionExist = 1;
+            }
+        }
+    }
+
+    return doesQuestionExist;
 }
 
 void destroyCollection(questionsCollection* questions) {
